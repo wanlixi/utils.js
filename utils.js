@@ -120,7 +120,8 @@ export function Base64 () { // base64 加密 解密
     var i = 0,
         c2 = 0,
         c1 = c2,
-        c = c1;
+        c = c1,
+        c3;
     while ( i < utftext.length ) {
       c = utftext.charCodeAt(i);
       if (c < 128) {
