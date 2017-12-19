@@ -36,6 +36,26 @@ export const reg = {
 };
 export const getStorage = key => JSON.parse(localStorage.getItem(key) || '[]');
 export const setStorage = (items, key) => localStorage.setItem(key, JSON.stringify(items));
+
+export const setCookie = (key,value,expiredays) => {
+  let exdate = new Date();
+  exdate.setDate(exdate.getDate() + expiredays)
+  document.cookie = `${key}=${escape(value)}${((expiredays==null) ? "" : ";expires=" + exdate.toGMTString())}`
+}
+
+//取回cookie
+export const getCookie = key => {
+  if (document.cookie.length > 0) {
+    c_start = document.cookie.indexOf(`${key=}`)
+    if (c_start! = -1) { 
+      c_start = c_start + key.length + 1;
+      c_end = document.cookie.indexOf(";", c_start);
+      if (c_end == -1) c_end = document.cookie.length;
+      return unescape(document.cookie.substring(c_start, c_end));
+    } 
+  }
+  return "";
+}
 export function Base64 () { // base64 加密 解密
   // private property
   var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
