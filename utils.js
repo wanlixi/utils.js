@@ -1,65 +1,112 @@
+import api from '@/api'
+import wx from 'weixin-js-sdk';
 // 输入身份证号码截取生日
 export const getBirthday = idcard => idcard.substring(6, 10) + '-' + idcard.substring(10, 12) + '-' + idcard.substring(12, 14)
 
 // 时间戳转为 xxxx-xx-xx 格式
-export const formatDate = timeStamp => {
+export const formatDate = (timeStamp, HHMMSS) => {
   let date = new Date(timeStamp)
   let year = date.getFullYear()
   let month = date.getMonth() + 1
   let day = date.getDate()
+  let h = date.getHours()
+  let m = date.getMinutes()
+  let s = date.getSeconds()
+  if (HHMMSS) {
+    return `${year}-${dealthTenBelow(month)}-${dealthTenBelow(day)} ${dealthTenBelow(h)}:${dealthTenBelow(m)}:${dealthTenBelow(s)}`
+  }
   return `${year}-${dealthTenBelow(month)}-${dealthTenBelow(day)}`
 };
 // 小于10的月或日处理例如9月=09月
 export const dealthTenBelow = date => date < 10 ? `0${date}` : date;
 // 常用的正则
 export const reg = {
-  CNName: /^([\u4E00-\u9FCB\u3400-\u4DB5]{1,26})(·[\u4E00-\u9FCB\u3400-\u4DB5]{1,26})*$/,
+  CNName: /^([\u4E00-\u9FCB\u3400-\u4DB5]{1,26})(·[\u4E00-\u9FCB\u3400-\u4DB5]{1,26})*$/, // 中文名字
   ENName: /^[a-zA-Z\.\、]([a-zA-Z\.\、\ ]{0,24})[a-zA-Z\.\、]$/,
-  IDCARD: /^[0-6](\d{5})(\d{8})(\d{2})(\d)([0-9Xx])$/,
-  BORNCARD: /^[A-Z](\d{9})$/,
-  // E171802399
-  TAIWAN: /^[A-Z][0-9]{9}$/,
-  // P103265(1)
-  XIANGGANG: /[A-Z][0-9]{6}\([0-9A]\)/,
-  // 82000019780815709X
-  AOMEN: /^[1|5|7][0-9]{6}\([0-9Aa]\)/,
-  // PASSPORT: /^[a-zA-Z0-9]{7,26}$/,
-  // 因私普通护照号码格式有:14/15+7位数,G+8位数；因公普通的是:P.+7位数；公务的是：S.+7位数 或者 S+8位数,以D开头的是外交护照.D=diplomatic 
-  // G28233515 s28233515 141234567
-  PASSPORT: /^1[45][0-9]{7}|([P|p|S|s]\d{7})|([S|s|G|g]\d{8})|([Gg|Tt|Ss|Ll|Qq|Dd|Aa|Ff]\d{8})|([H|h|M|m]\d{8，10})$/,
-  POST: /^(\d{6})$/,
+  CERTIFICATION: [
+    {
+      REG: /^[0-6](\d{5})(\d{8})(\d{2})(\d)([0-9Xx])$/,
+      ID: 1,
+      TEXT: '身份证',
+      MAX_LENGTH: 18
+    },
+    {
+      REG: /^[A-Z](\d{9})$/,
+      ID: 99,
+      TEXT: '出生证',
+      MAX_LENGTH: 10
+    },
+    {// E171802399
+      REG: /^[A-Z][0-9]{9}$/,
+      ID: 6,
+      TEXT: '台湾',
+      MAX_LENGTH: 18
+    },
+    {// P103265(1)
+      REG: /[A-Z][0-9]{6}\([0-9A]\)/,
+      ID: 6,
+      TEXT: '香港',
+      MAX_LENGTH: 18
+    },
+    {// 82000019780815709X
+      REG: /^[1|5|7][0-9]{6}\([0-9Aa]\)/,
+      ID: 6,
+      TEXT: '澳门',
+      MAX_LENGTH: 18
+    },
+    // 因私普通护照号码格式有:14/15+7位数,G+8位数；因公普通的是:P.+7位数；公务的是：S.+7位数 或者 S+8位数,以D开头的是外交护照.D=diplomatic 
+    // G28233515 s28233515 141234567
+    // /^[a-zA-Z0-9]{7,26}$/;  // 太平宝宝的护照
+    {
+      REG: /^1[45][0-9]{7}|([P|p|S|s]\d{7})|([S|s|G|g]\d{8})|([Gg|Tt|Ss|Ll|Qq|Dd|Aa|Ff]\d{8})|([H|h|M|m]\d{8，10})$/,
+      ID: 3,
+      TEXT: '护照',
+      MAX_LENGTH: 9
+    }
+  ],
+  POST: /^(\d{6})$/, // 邮编
   EMAIL: /^(\w|([\u4e00-\u9fa5]))+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
-  PHONE: /^1\d{10}$/i,
-  ALLLETTER: /^[a-zA-Z]{5,30}$/,
-  ALLNUMBER: /^[0-9]{5,30}$/,
+  PHONE: /^[1][3,4,5,7,8][0-9]{9}$/, //手机号
+  ALLLETTER: /^[a-zA-Z]{5,30}$/, // 纯字母
+  ALLNUMBER: /^[0-9]{5,30}$/, // 纯数字
 
 };
-export const getStorage = key => JSON.parse(localStorage.getItem(key) || '[]');
-export const setStorage = (items, key) => localStorage.setItem(key, JSON.stringify(items));
 
-export const setCookie = (key,value,expiredays) => {
+// sessionStorage
+export const getStorage = key => JSON.parse(sessionStorage.getItem(key) || '[]');
+export const setStorage = (items, key) => sessionStorage.setItem(key, JSON.stringify(items));
+// cookie
+export const setCookie = (key, value, expiredays) => {
   let exdate = new Date();
-  exdate.setDate(exdate.getDate() + expiredays)
-  document.cookie = `${key}=${escape(value)}${((expiredays==null) ? "" : ";expires=" + exdate.toGMTString())}`
+  exdate.setDate(exdate.getDate() + expiredays);
+  document.cookie = `${key}=${escape(value)}${((expiredays == null) ? "" : ";expires=" + exdate.toGMTString())}`;
 }
-
 //取回cookie
 export const getCookie = key => {
   if (document.cookie.length > 0) {
-    c_start = document.cookie.indexOf(`${key}=`)
-    if (c_start! = -1) { 
+    let c_start = document.cookie.indexOf(`${key}=`);
+    if (c_start != -1) { 
       c_start = c_start + key.length + 1;
-      c_end = document.cookie.indexOf(";", c_start);
+      let c_end = document.cookie.indexOf(";",c_start);
       if (c_end == -1) c_end = document.cookie.length;
       return unescape(document.cookie.substring(c_start, c_end));
     } 
   }
-  return "";
+  return ""
 }
-export function Base64 () { // base64 加密 解密
+/**
+*
+*  Base64 encode / decode
+*
+*  @author haitao.tu
+*  @date   2010-04-26
+*  @email  tuhaitao@foxmail.com
+*
+*/
+ // base64 加密 解密
+export function Base64 () {
   // private property
   var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
- 
   // public method for encoding
   this.encode = function (input) {
     var output = "";
@@ -148,6 +195,7 @@ export function Base64 () { // base64 加密 解密
         c1 = c2,
         c = c1,
         c3;
+    // var c = c1 = c2 = 0;
     while ( i < utftext.length ) {
       c = utftext.charCodeAt(i);
       if (c < 128) {
@@ -167,4 +215,85 @@ export function Base64 () { // base64 加密 解密
     return string;
   }
 }
+// 微信分享功能禁用
+export const controlShare = (option) => {
+  // 'hideOptionMenu'  'showOptionMenu'
+  function onBridgeReady() {
+    WeixinJSBridge.call(option);
+  }
+  if (typeof WeixinJSBridge == "undefined") {
+    if (document.addEventListener) {
+      document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+    } else if (document.attachEvent) {
+      document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+      document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+    }
+  } else {
+    onBridgeReady();
+  }
+}
+// 微信分享朋友和朋友圈
+export const wxShare = (com_id) => {
+  // let link = location.href;
+  // let link = encodeURIComponent(location.href);
+
+  let link = location.href.split('&')[0];
+  let wxShareInfos = [
+    {
+      com_id: 1,
+      title: '',
+      desc: '',
+      imgUrl: ''
+    }
+  ];
+  let {title, desc, imgUrl} = wxShareInfos.filter(item => item.com_id == com_id)[0];
+  api.getWxAuthInfo(link).then(res => {
+    if (res) {
+      wx.config({
+        appId: res.appid, // 必填，公众号的唯一标识
+        timestamp: res.timestamp, // 必填，生成签名的时间戳
+        nonceStr: res.nonceStr, // 必填，生成签名的随机串
+        signature: res.signature,// 必填，签名
+        debug: process.env.NODE_ENV === "development", // 开启调试模式,调用的所有a pi的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        jsApiList: [ // 注册要使用微信的哪些功能
+          "onMenuShareTimeline", // 分享到朋友圈
+          "onMenuShareAppMessage", // 分享给朋友
+        ]
+      });
+      wx.error(err => {
+          console.log('config失败',err);
+      });
+      wx.ready(() => {
+        console.log('wxReady')
+        wx.onMenuShareAppMessage({
+          title, desc, link, imgUrl,
+          trigger: res => {  
+            // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回  
+          },  
+          success: res => {  
+            alert('分享给朋友成功');  
+          },  
+          cancel: res => {  
+            alert('你没有分享给朋友');  
+          },  
+          fail: res => {  
+            alert(JSON.stringify(res));  
+          }  
+        });
+        wx.onMenuShareTimeline({
+          title, desc, link, imgUrl,
+          success: () => {   
+            alert('分享到朋友圈成功');  
+          },  
+          cancel: () => {   
+            alert('你没有分享到朋友圈');  
+          }  
+        })
+      })
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 
