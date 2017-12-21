@@ -95,16 +95,8 @@ export const getCookie = key => {
   }
   return ""
 }
-/**
-*
-*  Base64 encode / decode
-*
-*  @author haitao.tu
-*  @date   2010-04-26
-*  @email  tuhaitao@foxmail.com
-*
-*/
- // base64 加密 解密
+/* Base64 encode / decode */
+
 export function Base64 () {
   // private property
   var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
