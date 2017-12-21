@@ -1,7 +1,7 @@
 import api from '@/api'
 import wx from 'weixin-js-sdk';
 // 输入身份证号码截取生日
-export const getBirthday = idcard => idcard.substring(6, 10) + '-' + idcard.substring(10, 12) + '-' + idcard.substring(12, 14)
+export const getBirthday = idcard => `${idcard.substring(6, 10)}-${idcard.substring(10, 12)}-${idcard.substring(12, 14)}`;
 
 // 时间戳转为 xxxx-xx-xx 格式
 export const formatDate = (timeStamp, HHMMSS) => {
@@ -75,6 +75,7 @@ export const reg = {
 // sessionStorage
 export const getStorage = key => JSON.parse(sessionStorage.getItem(key) || '[]');
 export const setStorage = (items, key) => sessionStorage.setItem(key, JSON.stringify(items));
+export const getStorageNotIsEmptyArray = key => Object.prototype.toString.call(getStorage(key)) !== '[object Array]';
 // cookie
 export const setCookie = (key, value, expiredays) => {
   let exdate = new Date();
