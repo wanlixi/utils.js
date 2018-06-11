@@ -4,6 +4,8 @@
  * @param {boolean}opt.async 是否为异步请求，true为异步的，false为同步的
  * @param {object}opt.data 发送的参数，格式为对象类型
  * @param {function}opt.success ajax发送并接收成功调用的回调函数
+ * @param {function}opt.fail ajax发送并接收失败调用的回调函数
+ * @param {function}opt.complete ajax发送无论成功或失败都会调用的回调函数
  */
 const ajax = opt => {
   opt = opt || {};
