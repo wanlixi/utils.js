@@ -14,17 +14,17 @@ const ajax = opt => {
   opt.success = opt.success || function () {};
   opt.fail = opt.fail || function () {};
   opt.complete = opt.complete || function () {};
-  var xmlHttp = null;
+  let xmlHttp = null;
   if (XMLHttpRequest) {
     xmlHttp = new XMLHttpRequest();
   } else {
     xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
   }
-  var params = [];
-  for (var key in opt.data){
+  let params = [];
+  for (let key in opt.data){
     params.push(key + '=' + opt.data[key]);
   }
-  var postData = params.join('&');
+  let postData = params.join('&');
   if (opt.method.toUpperCase() === 'POST') {
     xmlHttp.open(opt.method, opt.url, opt.async);
     xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
@@ -35,7 +35,7 @@ const ajax = opt => {
   } 
   xmlHttp.onreadystatechange = function () {
     if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-      var data = null;
+      let data = null;
       if (typeof xmlHttp.responseText === 'string' && xmlHttp.responseText) {
         data = JSON.parse(xmlHttp.responseText);
       }
