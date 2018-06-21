@@ -317,15 +317,11 @@ export const parseUrl = url => {
     let x = a.split('&');
     for (let i = x.length - 1; i >= 0; i--) {
       let y = x[i].split('=');
-      let key = y[0];
-      let val = y[1];
-      obj[key] = val;
+      obj[y[0]] = y[1];
     }
-    return obj
   } else {
     let m = a.split('=');
-    return {
-      [m[0]]: m[1]
-    }
+    obj[m[0]] = m[1];
   }
+  return obj;
 }
