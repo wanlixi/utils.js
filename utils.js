@@ -306,3 +306,26 @@ export const parseQueryString = url => {
  }
  return ret;
 }
+// 解析url的参数 返回一个对象
+export const parseUrl = url => {
+  if (Object.prototype.toString.call(url) !== "[object String]") return
+  let a = url.split('?')[1];
+  let obj = {};
+  url = url.trim().replace(/^(\?|#|&)/, '');
+  if (!url) return obj
+  if (a.indexOf('&') > -1) {
+    let x = a.split('&');
+    for (let i = x.length - 1; i >= 0; i--) {
+      let y = x[i].split('=');
+      let key = y[0];
+      let val = y[1];
+      obj[key] = val;
+    }
+    return obj
+  } else {
+    let m = a.split('=');
+    return {
+      [m[0]]: m[1]
+    }
+  }
+}
