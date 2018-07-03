@@ -1,5 +1,47 @@
-import api from '@/api'
-import wx from 'weixin-js-sdk';
+// import api from '@/api'
+// import wx from 'weixin-js-sdk';
+
+// scrollTop为滚动条在Y轴上的滚动距离。
+// clientHeight为内容可视区域的高度。
+// scrollHeight为内容可视区域的高度加上溢出（滚动）的距离。
+// 由这些dom属性可知：滚动条到底部的公式为：scrollTop + clientHeight == scrollHeight
+
+// getScrollTop（） 为false 代表已经滚动到最顶部
+export const getScrollTop = () => {
+  let scrollTop = 0, bodyScrollTop = 0, documentScrollTop = 0;
+  if (document.body) {
+    bodyScrollTop = document.body.scrollTop;
+  }
+  if (document.documentElement) {
+    documentScrollTop = document.documentElement.scrollTop;
+  }
+  scrollTop = (bodyScrollTop - documentScrollTop > 0) ? bodyScrollTop : documentScrollTop;
+  return scrollTop;
+}
+// 为0时，则为滚动到最顶部
+export const getScrollHeight = () => {
+  let scrollHeight = 0, bodyScrollHeight = 0, documentScrollHeight = 0;
+  if (document.body) {
+    bodyScrollHeight = document.body.scrollHeight;
+  }
+  if (document.documentElement) {
+    documentScrollHeight = document.documentElement.scrollHeight;
+  }
+  scrollHeight = (bodyScrollHeight - documentScrollHeight > 0) ? bodyScrollHeight : documentScrollHeight;
+  return scrollHeight;
+}
+export const getClientHeight = () => {
+  let windowHeight = 0;
+  if (document.compatMode == "CSS1Compat") {
+    windowHeight = document.documentElement.clientHeight;
+  } else {
+    windowHeight = document.body.clientHeight;
+  }
+  return windowHeight;
+}
+// scrollToBottom 为true 代表已经滚动到最底部
+export const scrollToBottom = getScrollTop() + getClientHeight() >= getScrollHeight();
+
 // 输入身份证号码截取生日
 export const getBirthday = idcard => `${idcard.substring(6, 10)}-${idcard.substring(10, 12)}-${idcard.substring(12, 14)}`;
 
